@@ -13,7 +13,7 @@ add_option( "con_db_version", "1.0" );
 
 class Contact_Form {
 		
-	public function con_install() {
+	public static function con_install() {
 		global $wpdb;
 		global $con_db_version;
 	
@@ -37,7 +37,7 @@ class Contact_Form {
 		update_option( 'con_db_version', $con_db_version );
 	}
 	
-	public function con_install_data() {
+	public static function con_install_data() {
 		global $wpdb;
 		
 		$welcome_name = 'Mr. WordPress';
@@ -55,25 +55,35 @@ class Contact_Form {
 		);
 	}
 
-	public function form_contact_update_db_check() {
+	public static function form_contact_update_db_check() {
 		global $con_db_version;
 		if ( get_site_option( 'con_db_version' ) != $con_db_version ) {
 			self::con_install();
 		}
 	}
 
-	public function delete_testimonial() {
-		// global $wpdb;
-
+	public static function delete_testimonial() {
+		global $wpdb;
+		
 		if(isset($_GET['delete'])) {
-			echo $_GET['id'];
+			$id = $_GET['id'];
+
+			$table = $wpdb->prefix.'testimonial';			
+			$result = $wpdb->delete( $table, array( 'id' => $id ) );
+
+			if($result) {
+				// wp_redirect('');
+				// exit;
+			} else {
+
+			}
 		}
 
 	}
 
-	public function contact_form_menu(){
+	public static function contact_form_menu(){
 		echo "<div class='wrap'><h2>Manage Contact Form</h2></div>";
-		
+		// $this->delete_testimonial();
 		global $wpdb;
 		$results = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}testimonial", OBJECT );
 
@@ -94,11 +104,7 @@ class Contact_Form {
 				<td>".$tm->phone_number."</td>
 				<td>".$tm->testimoni."</td>
 				<td>
-					<form id='cf_delete' method='get'>
-						<input type='hidden' name='id' value='".$tm->id."'>
-						<input type='submit' name='delete' value='Delete'> 
-					</form>
-					
+					<a href='admin.php?page=contact-form&delete=true&id=".$tm->id."' onclick='".self::delete_testimonial()."'>Delete</a>
 				</td></tr>";
 			$no++;
 		}
@@ -106,11 +112,11 @@ class Contact_Form {
 		echo "</table>";
 	}
 
-	public function cf_admin_menu() {
+	public static function cf_admin_menu() {
 		add_menu_page( 'Contact Form Menu', 'Contact Form', 'manage_options', 'contact-form', array('Contact_Form','contact_form_menu'), 'dashicons-tickets', 6  );
 	}
 
-	public function save_testimonial() {
+	public static function save_testimonial() {
 		// if the submit button is clicked, send the email
 		if ( isset( $_POST['cf-submitted'] ) ) {
 			global $wpdb;
@@ -141,12 +147,12 @@ class Contact_Form {
 		
 	}
 
-	public function html_form_code() {
+	public static function html_form_code() {
 		include( 'templates/forms.php' );
 		self::save_testimonial();
 	}
 
-	public function cf_shortcode() {
+	public static function cf_shortcode() {
 		ob_start();    
 		self::html_form_code();    
 		return ob_get_clean();
@@ -156,10 +162,10 @@ class Contact_Form {
 $contact_form = new Contact_Form();
 require_once( plugin_dir_path( __FILE__ ) . 'class.contact-form-widget.php' );
 
-register_activation_hook( __FILE__, array('Contact_Form','con_install') );
-register_activation_hook( __FILE__, array('Contact_Form','con_install_data') );
+register_activation_hook( __FILE__, array($contact_form,'con_install') );
+register_activation_hook( __FILE__, array($contact_form,'con_install_data') );
 
-add_action( 'plugins_loaded', array('Contact_Form','form_contact_update_db_check') );
-add_action( 'admin_menu', array('Contact_Form','cf_admin_menu') );
+add_action( 'plugins_loaded', array($contact_form,'form_contact_update_db_check') );
+add_action( 'admin_menu', array($contact_form,'cf_admin_menu') );
 
-add_shortcode( 'sitepoint_contact_form', array('Contact_Form','cf_shortcode') );
+add_shortcode( 'sitepoint_contact_form', array($contact_form,'cf_shortcode') );
