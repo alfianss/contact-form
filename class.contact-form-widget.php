@@ -8,9 +8,9 @@ class Contact_Form_Widget extends WP_Widget {
 	 */
 	function __construct() {
 		parent::__construct(
-			'foo_widget', // Base ID
+			'contact_form_widget', // Base ID
 			esc_html__( 'Widget Title', 'text_domain' ), // Name
-			array( 'description' => esc_html__( 'A Foo Widget', 'text_domain' ), ) // Args
+			array( 'description' => esc_html__( 'Contact Form Widget', 'text_domain' ), ) // Args
 		);
 	}
 
@@ -27,7 +27,7 @@ class Contact_Form_Widget extends WP_Widget {
 		if ( ! empty( $instance['title'] ) ) {
 			echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
 		}
-		echo esc_html__( 'Hello, World!', 'text_domain' );
+        include( 'templates/testimoni.php' );
 		echo $args['after_widget'];
 	}
 
@@ -66,8 +66,9 @@ class Contact_Form_Widget extends WP_Widget {
 	}
 }
 
-// register Foo_Widget widget
+// register Contact_Form_Widget widget
 function register_contact_form_widget() {
     register_widget( 'Contact_Form_Widget' );
 }
+
 add_action( 'widgets_init', 'register_contact_form_widget' );
