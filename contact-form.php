@@ -31,6 +31,8 @@ class Contact_Form {
 			email varchar(50) DEFAULT '' NOT NULL,
 			phone_number varchar(15) DEFAULT '' NOT NULL,
 			testimoni text DEFAULT '' NOT NULL,
+			created_date date NOT NULL,
+			blog_id int(11) NOT NULL,
 			PRIMARY KEY  (id)
 		) $charset_collate;";
 	
@@ -54,7 +56,7 @@ class Contact_Form {
 			$id = $_GET['id'];
 
 			$table = $wpdb->prefix.'testimonial';			
-			$result = $wpdb->delete( $table, array( 'id' => $id ) );
+			$result = $wpdb->delete( $table, array( 'id' => $id, 'blog_id' => get_current_blog_id() ) );
 
 			
 		}
@@ -62,12 +64,12 @@ class Contact_Form {
 	}
 
 	public function contact_form_menu(){
-		echo "<div class='wrap'><h2>Manage Contact Form</h2></div>";
+		$html = "<div class='wrap'><h2>Manage Contact Form</h2></div>";
 		$this->delete_testimonial();
 		global $wpdb;
 		$results = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}testimonial", OBJECT );
 
-		echo "<table border='1'>
+		$html .= "<table border='1'>
 				<thead>
 					<th>No</th>
 					<th>Name</th>
@@ -78,7 +80,7 @@ class Contact_Form {
 				<thead>";
 		$no = 1; 
 		foreach($results as $tm) {
-			echo "<tr><td>".$no."</td>
+			$html .= "<tr><td>".$no."</td>
 				<td>".$tm->name."</td>
 				<td>".$tm->email."</td>
 				<td>".$tm->phone_number."</td>
@@ -89,7 +91,10 @@ class Contact_Form {
 			$no++;
 		}
 
-		echo "</table>";
+		$html .= "</table>";
+		$html .= "<br><div><blockquote>Copy this shortcode:<br>[sitepoint_contact_form]</blockquote></div>";
+
+		echo $html;
 	}
 
 	public function cf_admin_menu() {
@@ -110,7 +115,9 @@ class Contact_Form {
 				'name' => $name, 
 				'email' => $email,
 				'phone_number' => $phone,
-				'testimoni' => $testimonial 
+				'testimoni' => $testimonial,
+				'created_date' => date('YYYY-mn-dd'),
+				'blog_id' => get_current_blog_id()
 			);
 	
 			$table = $wpdb->prefix.'testimonial'; 		
